@@ -1,3 +1,12 @@
+# project files
+*.sln
+*.vcxproj
+*.user
+*.filters
+*.vcxproj
+Sources/NotEngine/.vs/*
+Bin/*
+Bin-Int/*
 # Prerequisites
 *.d
 
