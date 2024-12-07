@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
-#include <time.h>
+#include <threads.h>
+#define MAX_SINKS 32
 
 /**
  * @enum LogLevel
@@ -211,6 +212,19 @@ void logger_add_sink(struct Logger* logger, LogSink* sink);
  */
 void logger_log(struct Logger* logger, LogLevel level, const char* file, int line, const char* fmt, ...);
 
+
+/**
+ * @brief 记录一条日志消息。
+ *
+ * @param logger 指向日志器的指针。
+ * @param level 日志级别。
+ * @param file 源文件名。
+ * @param line 行号。
+ * @param fmt 格式化字符串。
+ * @param list 可变参数列表。
+ */
+void logger_log_va_list(struct Logger* logger, LogLevel level, const char* file, int line, const char* fmt,va_list list );
+
 /**
  * @brief 创建日志格式配置。
  *
@@ -220,13 +234,26 @@ void logger_log(struct Logger* logger, LogLevel level, const char* file, int lin
  */
 LogFormat* log_format_create(const LogFormatElement* elements, int count);
 
+/**
+ * @struct Logger
+ * @brief 定义日志器的结构体，管理日志的状态、输出目标和同步机制。
+ */
+typedef struct Logger {
+    bool running;                /**< 日志器是否正在运行 */
+    const char* name;            /**< 日志器的名称 */
+    bool async;                  /**< 是否异步记录日志 */
+    struct LogSink* sinks[MAX_SINKS]; /**< 日志输出目标数组 */
+    int sink_count;              /**< 当前日志输出目标的数量 */
 
-// 便捷宏
-#define LOG_TRACE(logger, ...) logger_log(logger, LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_DEBUG(logger, ...) logger_log(logger, LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_INFO(logger, ...)  logger_log(logger, LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_WARN(logger, ...)  logger_log(logger, LOG_WARN, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_ERROR(logger, ...) logger_log(logger, LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_FATAL(logger, ...) logger_log(logger, LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+    // 同步相关
+    mtx_t mutex;                 /**< 用于保护日志器状态的互斥锁 */
 
-
+    // 异步相关
+    thrd_t worker_thread;        /**< 工作线程，用于异步日志处理 */
+    mtx_t queue_mutex;           /**< 用于保护日志队列的互斥锁 */
+    mtx_t queue_cnd;           /**< 用于保护日志队列的互斥锁 */
+    struct LogMessage* queue_head; /**< 日志消息队列的头指针 */
+    struct LogMessage* queue_tail; /**< 日志消息队列的尾指针 */
+    // 格式相关
+    struct LogFormat* format;    /**< 日志格式配置 */
+} Logger;

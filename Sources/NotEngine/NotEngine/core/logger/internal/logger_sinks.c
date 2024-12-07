@@ -1,10 +1,9 @@
-#include "log.h"
-#include "log_internal.h"
+#include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <ctype.h>
+#include <stdbool.h>
 
 // 路径处理工具
 #ifdef _WIN32
@@ -223,7 +222,7 @@ static void rolling_sink_destroy(LogSink* sink) {
 }
 
 // 格式化日志消息的函数
-static void format_log_message(const Logger* logger, const LogMessage* msg,
+static void format_log_message(const struct Logger* logger, const LogMessage* msg,
     const LogFormat* format, char* buffer, size_t buffer_size) {
     char* pos = buffer;
     size_t remaining = buffer_size;
@@ -276,7 +275,7 @@ static void console_write(LogMessage* msg, void* user_data) {
     LogSink* sink = (LogSink*)user_data;
     char buffer[8192];  // 足够大的缓冲区
     // 获取Logger实例
-    Logger* logger = sink->logger;
+    struct Logger* logger = sink->logger;
 
     // 使用sink的格式或全局格式
     const LogFormat* format = sink->config.format ? sink->config.format : logger->format;
@@ -301,7 +300,7 @@ static void file_write(LogMessage* msg, void* user_data) {
     LogSink* sink = data->sink;
     FILE* file = data->file;
     char buffer[8192];
-    Logger* logger = sink->logger;
+    struct Logger* logger = sink->logger;
     const LogFormat* format = sink->config.format ? sink->config.format : logger->format;
 
     if (!format) {

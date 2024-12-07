@@ -1,5 +1,4 @@
-#include "log.h"
-#include "log_internal.h"
+#include "logger.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +8,7 @@
 
 // 工作线程函数
 static int worker_thread_func(void* arg) {
-    Logger* logger = (Logger*)arg;
+    struct Logger* logger = (struct Logger*)arg;
 
     while (logger->running || logger->queue_head) {
         LogMessage* msg = NULL;
@@ -44,8 +43,8 @@ static int worker_thread_func(void* arg) {
 }
 
 // 创建Logger
-Logger* logger_create(const LogConfig* config) {
-    Logger* logger = (Logger*)malloc(sizeof(Logger));
+struct Logger* logger_create(const LogConfig* config) {
+    struct Logger* logger = (struct Logger*)malloc(sizeof(struct Logger));
     if (!logger) return NULL;
 
     logger->running = true;
@@ -66,7 +65,7 @@ Logger* logger_create(const LogConfig* config) {
 }
 
 // 销毁Logger
-void logger_destroy(Logger* logger) {
+void logger_destroy(struct Logger* logger) {
     if (!logger) return;
 
     logger->running = false;
@@ -99,9 +98,18 @@ void logger_add_sink(Logger* logger, LogSink* sink) {
 }
 
 // 写日志
-void logger_log(Logger* logger, LogLevel level, const char* file, int line, const char* fmt, ...) {
+void logger_log( Logger* logger, LogLevel level, const char* file, int line, const char* fmt, ...) {
     if (!logger || !fmt) return;
 
+    va_list args;
+    va_start(args, fmt);
+    logger_log_va_list(logger,level,file,line,fmt,args);
+    va_end(args);
+}
+
+void logger_log_va_list(struct Logger* logger, LogLevel level, const char* file, int line, const char* fmt,
+    va_list list)
+{
     LogMessage* msg = (LogMessage*)malloc(sizeof(LogMessage));
     if (!msg) return;
 
@@ -111,10 +119,8 @@ void logger_log(Logger* logger, LogLevel level, const char* file, int line, cons
     msg->time = time(NULL);
     msg->next = NULL;
 
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(msg->message, sizeof(msg->message), fmt, args);
-    va_end(args);
+    vsnprintf(msg->message, sizeof(msg->message), fmt, list);
+
 
     if (logger->async) {
         mtx_lock(&logger->queue_mutex);
