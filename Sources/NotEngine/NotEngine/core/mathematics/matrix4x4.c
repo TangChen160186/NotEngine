@@ -2,10 +2,12 @@
 #include <stdbool.h>
 #include "matrix4x4.h"
 #include "math_funcs.h"
+#include "quaternion.h"
 #include "vector3.h"
+#include "core/logger/assert.h"
 // Function implementations
 
-bool Matrix44_Equals(Matrix4x4 a, Matrix4x4 b) {
+bool matrix44_equals(matrix_4_4 a, matrix_4_4 b) {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             if (a.data[i][j] != b.data[i][j]) {
@@ -16,7 +18,7 @@ bool Matrix44_Equals(Matrix4x4 a, Matrix4x4 b) {
     return true;
 }
 
-bool Matrix44_ApproximateEquals(Matrix4x4 a, Matrix4x4 b) {
+bool matrix44_approximate_equals(matrix_4_4 a, matrix_4_4 b) {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             if (math_abs(a.data[i][j] - b.data[i][j]) > MATH_EPSILON) {
@@ -27,17 +29,17 @@ bool Matrix44_ApproximateEquals(Matrix4x4 a, Matrix4x4 b) {
     return true;
 }
 
-Matrix4x4 Matrix44_Identity()
+matrix_4_4 matrix44_identity()
 {
-    Matrix4x4 result = { {{1, 0, 0, 0},
+    matrix_4_4 result = { {{1, 0, 0, 0},
                     {0, 1, 0, 0},
                     {0, 0, 1, 0},
                     {0, 0, 0, 1}} };
     return result;
 }
 
-Matrix4x4 Matrix44_Add(Matrix4x4 a, Matrix4x4 b) {
-    Matrix4x4 result = {0};
+matrix_4_4 matrix44_add(matrix_4_4 a, matrix_4_4 b) {
+    matrix_4_4 result = {0};
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = a.data[i][j] + b.data[i][j];
@@ -46,8 +48,8 @@ Matrix4x4 Matrix44_Add(Matrix4x4 a, Matrix4x4 b) {
     return result;
 }
 
-Matrix4x4 Matrix44_Subtract(Matrix4x4 a, Matrix4x4 b) {
-    Matrix4x4 result = { 0 };
+matrix_4_4 matrix44_subtract(matrix_4_4 a, matrix_4_4 b) {
+    matrix_4_4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = a.data[i][j] - b.data[i][j];
@@ -56,8 +58,8 @@ Matrix4x4 Matrix44_Subtract(Matrix4x4 a, Matrix4x4 b) {
     return result;
 }
 
-Matrix4x4 Matrix44_Negate(Matrix4x4 m) {
-    Matrix4x4 result = { 0 };
+matrix_4_4 matrix44_negate(matrix_4_4 m) {
+    matrix_4_4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = -m.data[i][j];
@@ -66,8 +68,8 @@ Matrix4x4 Matrix44_Negate(Matrix4x4 m) {
     return result;
 }
 
-Matrix4x4 Matrix44_Product(Matrix4x4 a, Matrix4x4 b) {
-    Matrix4x4 result = { 0 };
+matrix_4_4 matrix44_product(matrix_4_4 a, matrix_4_4 b) {
+    matrix_4_4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 4; ++k) {
@@ -78,9 +80,9 @@ Matrix4x4 Matrix44_Product(Matrix4x4 a, Matrix4x4 b) {
     return result;
 }
 
-Matrix4x4 Matrix44_Multiply_scalar(Matrix4x4 a, float scalar)
+matrix_4_4 matrix44_multiply_scalar(matrix_4_4 a, float scalar)
 {
-    Matrix4x4 result = { 0 };
+    matrix_4_4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 4; ++k) {
@@ -91,8 +93,8 @@ Matrix4x4 Matrix44_Multiply_scalar(Matrix4x4 a, float scalar)
     return result;
 }
 
-Matrix4x4 Matrix44_Transpose(Matrix4x4 m) {
-    Matrix4x4 result = { 0 };
+matrix_4_4 matrix44_transpose(matrix_4_4 m) {
+    matrix_4_4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = m.data[j][i];
@@ -103,7 +105,7 @@ Matrix4x4 Matrix44_Transpose(Matrix4x4 m) {
 
 
 
-float Matrix44_Determinant(Matrix4x4 m) {
+float matrix44_determinant(matrix_4_4 m) {
     float det;
     det = m.data[0][0] * (m.data[1][1] * (m.data[2][2] * m.data[3][3] - m.data[2][3] * m.data[3][2]) -
         m.data[1][2] * (m.data[2][1] * m.data[3][3] - m.data[2][3] * m.data[3][1]) +
@@ -120,9 +122,10 @@ float Matrix44_Determinant(Matrix4x4 m) {
     return det;
 }
 
-Matrix4x4 Matrix44_Invert(Matrix4x4 m) {
-    Matrix4x4 result;
-    float det = Matrix44_Determinant(m);
+matrix_4_4 matrix44_invert(matrix_4_4 m) {
+    matrix_4_4 result;
+    float det = matrix44_determinant(m);
+    ASSERT_MSG(math_abs(det) > MATH_EPSILON, "Matrix is not invertible (determinant is zero)");
     float invDet = 1.0f / det;
 
     // Calculate the adjugate matrix
@@ -149,7 +152,10 @@ Matrix4x4 Matrix44_Invert(Matrix4x4 m) {
     return result;
 }
 
-void Matrix44_Decompose(Matrix4x4 m, Vector3* scale, Quaternion* rotation, Vector3* translation) {
+void matrix44_decompose(matrix_4_4 m, vector3* scale, quaternion* rotation, vector3* translation) {
+    ASSERT_NOT_NULL(scale);
+    ASSERT_NOT_NULL(rotation);
+    ASSERT_NOT_NULL(translation);
     // Extract translation
     translation->x = m.data[3][0];
     translation->y = m.data[3][1];
@@ -161,7 +167,7 @@ void Matrix44_Decompose(Matrix4x4 m, Vector3* scale, Quaternion* rotation, Vecto
     scale->z = math_sqrt(m.data[2][0] * m.data[2][0] + m.data[2][1] * m.data[2][1] + m.data[2][2] * m.data[2][2]);
 
     // Normalize the rotation matrix
-    Matrix4x4 rotationMatrix = m;
+    matrix_4_4 rotationMatrix = m;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             rotationMatrix.data[i][j] /= scale->arr[i];
@@ -203,16 +209,16 @@ void Matrix44_Decompose(Matrix4x4 m, Vector3* scale, Quaternion* rotation, Vecto
     }
 }
 
-Vector3 Matrix44_TransformVector3(Matrix4x4 m, Vector3 v) {
-    Vector3 result;
+vector3 matrix44_transform_vector3(matrix_4_4 m, vector3 v) {
+    vector3 result;
     result.x = m.data[0][0] * v.x + m.data[1][0] * v.y + m.data[2][0] * v.z + m.data[3][0];
     result.y = m.data[0][1] * v.x + m.data[1][1] * v.y + m.data[2][1] * v.z + m.data[3][1];
     result.z = m.data[0][2] * v.x + m.data[1][2] * v.y + m.data[2][2] * v.z + m.data[3][2];
     return result;
 }
 
-Vector4 Matrix44_TransformVector4(Matrix4x4 m, Vector4 v) {
-    Vector4 result;
+vector4 matrix44_transform_vector4(matrix_4_4 m, vector4 v) {
+    vector4 result;
     result.x = m.data[0][0] * v.x + m.data[1][0] * v.y + m.data[2][0] * v.z + m.data[3][0] * v.w;
     result.y = m.data[0][1] * v.x + m.data[1][1] * v.y + m.data[2][1] * v.z + m.data[3][1] * v.w;
     result.z = m.data[0][2] * v.x + m.data[1][2] * v.y + m.data[2][2] * v.z + m.data[3][2] * v.w;
@@ -220,9 +226,9 @@ Vector4 Matrix44_TransformVector4(Matrix4x4 m, Vector4 v) {
     return result;
 }
 
-Matrix4x4 Matrix44_Lerp(Matrix4x4 a, Matrix4x4 b, float t)
+matrix_4_4 matrix44_lerp(matrix_4_4 a, matrix_4_4 b, float t)
 {
-    Matrix4x4 result;
+    matrix_4_4 result;
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = a.data[i][j] * (1 - t) + b.data[i][j] * t;
@@ -231,7 +237,7 @@ Matrix4x4 Matrix44_Lerp(Matrix4x4 a, Matrix4x4 b, float t)
     return result;
 }
 
-Matrix4x4 Matrix44_TransformQuaternion(Matrix4x4 m, Quaternion q)
+matrix_4_4 matrix44_transform_quaternion(matrix_4_4 m, quaternion q)
 {
     // Compute rotation matrix elements
     float twoI = q.i + q.i, twoJ = q.j + q.j, twoK = q.k + q.k;
@@ -252,7 +258,7 @@ Matrix4x4 Matrix44_TransformQuaternion(Matrix4x4 m, Quaternion q)
     float tR2C2 = 1.0f - twoII - twoJJ;
 
     // Compute the transformed matrix
-    Matrix4x4 result;
+    matrix_4_4 result;
 
     // First row
     result.data[0][0] = m.data[0][0] * tR0C0 + m.data[0][1] * tR1C0 + m.data[0][2] * tR2C0;
@@ -283,8 +289,10 @@ Matrix4x4 Matrix44_TransformQuaternion(Matrix4x4 m, Quaternion q)
 
 
 
-Matrix4x4 Matrix44_CreateFromQuaternion(Quaternion q) {
-    Matrix4x4 result;
+matrix_4_4 matrix44_create_from_quaternion(quaternion q) {
+    ASSERT_MSG(quaternion_is_normalized(q),
+        "Quaternion must be normalized for matrix creation");
+    matrix_4_4 result;
     float twoI = q.i + q.i, twoJ = q.j + q.j, twoK = q.k + q.k;
     float twoUI = q.u * twoI, twoUJ = q.u * twoJ, twoUK = q.u * twoK;
     float twoII = q.i * twoI, twoIJ = q.i * twoJ, twoIK = q.i * twoK;
@@ -313,53 +321,55 @@ Matrix4x4 Matrix44_CreateFromQuaternion(Quaternion q) {
     return result;
 }
 
-Matrix4x4 Matrix44_CreateTranslation(float x, float y, float z) {
-    Matrix4x4 result = { {{1, 0, 0, 0},
+matrix_4_4 matrix44_create_translation(float x, float y, float z) {
+    matrix_4_4 result = { {{1, 0, 0, 0},
                         {0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {x, y, z, 1}} };
     return result;
 }
 
-Matrix4x4 Matrix44_CreateScale(float x, float y, float z) {
-    Matrix4x4 result = { {{x, 0, 0, 0},
+matrix_4_4 matrix44_create_scale(float x, float y, float z) {
+    matrix_4_4 result = { {{x, 0, 0, 0},
                         {0, y, 0, 0},
                         {0, 0, z, 0},
                         {0, 0, 0, 1}} };
     return result;
 }
 
-Matrix4x4 Matrix44_CreateRotationX(float radians) {
+matrix_4_4 matrix44_create_rotation_x(float radians) {
     float c = math_cos(radians);
     float s = math_sin(radians);
-    Matrix4x4 result = { {{1, 0, 0, 0},
+    matrix_4_4 result = { {{1, 0, 0, 0},
                         {0, c, s, 0},
                         {0, -s, c, 0},
                         {0, 0, 0, 1}} };
     return result;
 }
 
-Matrix4x4 Matrix44_CreateRotationY(float radians) {
+matrix_4_4 matrix44_create_rotation_y(float radians) {
     float c = math_cos(radians);
     float s = math_sin(radians);
-    Matrix4x4 result = { {{c, 0, -s, 0},
+    matrix_4_4 result = { {{c, 0, -s, 0},
                         {0, 1, 0, 0},
                         {s, 0, c, 0},
                         {0, 0, 0, 1}} };
     return result;
 }
 
-Matrix4x4 Matrix44_CreateRotationZ(float radians) {
+matrix_4_4 matrix44_create_rotation_z(float radians) {
     float c = math_cos(radians);
     float s = math_sin(radians);
-    Matrix4x4 result = { {{c, s, 0, 0},
+    matrix_4_4 result = { {{c, s, 0, 0},
                         {-s, c, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} };
     return result;
 }
-Matrix4x4 Matrix44_CreateFromAxisAngle(Vector3 axis, float angle) {
-    Matrix4x4 result;
+matrix_4_4 matrix44_create_from_axis_angle(vector3 axis, float angle) {
+    ASSERT_MSG(vector3_is_normalized(axis),
+        "Rotation axis must be normalized");
+    matrix_4_4 result;
     float x = axis.x, y = axis.y, z = axis.z;
     float sin = math_sin(angle), cos = math_cos(angle);
     float xx = x * x, yy = y * y, zz = z * z;
@@ -388,9 +398,17 @@ Matrix4x4 Matrix44_CreateFromAxisAngle(Vector3 axis, float angle) {
     return result;
 }
 
-Matrix4x4 Matrix44_CreateFromCartesianAxes(Vector3 right, Vector3 up, Vector3 backward) {
+matrix_4_4 matrix44_create_from_cartesian_axes(vector3 right, vector3 up, vector3 backward) {
+    ASSERT_MSG(vector3_is_normalized(right) &&
+        vector3_is_normalized(up) &&
+        vector3_is_normalized(backward),
+        "All axes must be normalized");
+    ASSERT_MSG(math_abs(vector3_dot(right, up)) < MATH_EPSILON &&
+        math_abs(vector3_dot(up, backward)) < MATH_EPSILON &&
+        math_abs(vector3_dot(backward, right)) < MATH_EPSILON,
+        "Axes must be orthogonal");
     // 轴必须两两垂直且为单位长度
-    Matrix4x4 result;
+    matrix_4_4 result;
     result.data[0][0] = right.x;
     result.data[0][1] = right.y;
     result.data[0][2] = right.z;
@@ -414,15 +432,15 @@ Matrix4x4 Matrix44_CreateFromCartesianAxes(Vector3 right, Vector3 up, Vector3 ba
     return result;
 }
 
-Matrix4x4 Matrix44_CreateWorld(Vector3 position, Vector3 forward, Vector3 up) {
-    Matrix4x4 result;
-    Vector3 backward = vector3_negate(forward);
+matrix_4_4 matrix44_create_world(vector3 position, vector3 forward, vector3 up) {
+    matrix_4_4 result;
+    vector3 backward = vector3_negate(forward);
     backward = vector3_normalize(backward);
 
-    Vector3 right = vector3_cross(up, backward);
+    vector3 right = vector3_cross(up, backward);
     right = vector3_normalize(right);
 
-    Vector3 final_up = vector3_cross(right, backward);
+    vector3 final_up = vector3_cross(right, backward);
     final_up = vector3_normalize(final_up);
 
     result.data[0][0] = right.x;
@@ -449,13 +467,15 @@ Matrix4x4 Matrix44_CreateWorld(Vector3 position, Vector3 forward, Vector3 up) {
 }
 
 
-Matrix4x4 Matrix44_CreatePerspectiveFieldOfView(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance) {
-    assert(fieldOfView > 0 && fieldOfView < MATH_PI);
-    assert(nearPlaneDistance > 0);
-    assert(farPlaneDistance > 0);
-    assert(nearPlaneDistance < farPlaneDistance);
+matrix_4_4 matrix44_create_perspective_field_of_view(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance) {
+    ASSERT_MSG(fieldOfView > 0 && fieldOfView < MATH_PI,
+        "Field of view must be between 0 and PI");
+    ASSERT_MSG(aspectRatio > 0, "Aspect ratio must be positive");
+    ASSERT_MSG(nearPlaneDistance > 0, "Near plane distance must be positive");
+    ASSERT_MSG(farPlaneDistance > nearPlaneDistance,
+        "Far plane must be further than near plane");
 
-    Matrix4x4 result = { 0 };
+    matrix_4_4 result = { 0 };
     float yScale = 1.0f / math_tan(fieldOfView * 0.5f);
     float xScale = yScale / aspectRatio;
     float f1 = farPlaneDistance / (nearPlaneDistance - farPlaneDistance);
@@ -470,12 +490,12 @@ Matrix4x4 Matrix44_CreatePerspectiveFieldOfView(float fieldOfView, float aspectR
     return result;
 }
 
-Matrix4x4 Matrix44_CreatePerspective(float width, float height, float nearPlaneDistance, float farPlaneDistance) {
+matrix_4_4 matrix44_create_perspective(float width, float height, float nearPlaneDistance, float farPlaneDistance) {
     assert(nearPlaneDistance > 0);
     assert(farPlaneDistance > 0);
     assert(nearPlaneDistance < farPlaneDistance);
 
-    Matrix4x4 result = { 0 };
+    matrix_4_4 result = { 0 };
     result.data[0][0] = (nearPlaneDistance * 2.0f) / width;
     result.data[1][1] = (nearPlaneDistance * 2.0f) / height;
     result.data[2][2] = farPlaneDistance / (nearPlaneDistance - farPlaneDistance);
@@ -485,13 +505,13 @@ Matrix4x4 Matrix44_CreatePerspective(float width, float height, float nearPlaneD
     return result;
 }
 
-Matrix4x4 Matrix44_CreatePerspectiveOffCenter(float left, float right, float bottom, float top,
+matrix_4_4 matrix44_create_perspective_off_center(float left, float right, float bottom, float top,
     float nearPlaneDistance, float farPlaneDistance) {
     assert(nearPlaneDistance > 0);
     assert(farPlaneDistance > 0);
     assert(nearPlaneDistance < farPlaneDistance);
 
-    Matrix4x4 result = { 0 };
+    matrix_4_4 result = { 0 };
     result.data[0][0] = (nearPlaneDistance * 2.0f) / (right - left);
     result.data[1][1] = (nearPlaneDistance * 2.0f) / (top - bottom);
     result.data[2][0] = (left + right) / (right - left);
@@ -503,8 +523,8 @@ Matrix4x4 Matrix44_CreatePerspectiveOffCenter(float left, float right, float bot
     return result;
 }
 
-Matrix4x4 Matrix44_CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane) {
-    Matrix4x4 result = { 0 };
+matrix_4_4 matrix44_create_orthographic(float width, float height, float zNearPlane, float zFarPlane) {
+    matrix_4_4 result = { 0 };
     result.data[0][0] = 2.0f / width;
     result.data[1][1] = 2.0f / height;
     result.data[2][2] = 1.0f / (zNearPlane - zFarPlane);
@@ -514,9 +534,12 @@ Matrix4x4 Matrix44_CreateOrthographic(float width, float height, float zNearPlan
     return result;
 }
 
-Matrix4x4 Matrix44_CreateOrthographicOffCenter(float left, float right, float bottom, float top,
+matrix_4_4 matrix44_create_orthographic_off_center(float left, float right, float bottom, float top,
     float zNearPlane, float zFarPlane) {
-    Matrix4x4 result = { 0 };
+    ASSERT_MSG(right != left, "Left and right planes cannot be equal");
+    ASSERT_MSG(top != bottom, "Top and bottom planes cannot be equal");
+    ASSERT_MSG(zFarPlane != zNearPlane, "Near and far planes cannot be equal");
+    matrix_4_4 result = { 0 };
     result.data[0][0] = 2.0f / (right - left);
     result.data[1][1] = 2.0f / (top - bottom);
     result.data[2][2] = 1.0f / (zNearPlane - zFarPlane);
@@ -528,21 +551,25 @@ Matrix4x4 Matrix44_CreateOrthographicOffCenter(float left, float right, float bo
     return result;
 }
 
-Matrix4x4 Matrix44_CreateLookAt(Vector3 cameraPosition, Vector3 cameraTarget, Vector3 cameraUpVector) {
-    Vector3 forward = vector3_subtract(cameraPosition, cameraTarget);
+matrix_4_4 matrix44_create_look_at(vector3 cameraPosition, vector3 cameraTarget, vector3 cameraUpVector) {
+    ASSERT_MSG(!vector3_equals(cameraPosition, cameraTarget),
+        "Camera position cannot be equal to target");
+    ASSERT_MSG(vector3_length_squared(cameraUpVector) > 0,
+        "Up vector cannot be zero");
+    vector3 forward = vector3_subtract(cameraPosition, cameraTarget);
     forward = vector3_normalize(forward);
 
-    Vector3 right = vector3_cross(cameraUpVector, forward);
+    vector3 right = vector3_cross(cameraUpVector, forward);
     right = vector3_normalize(right);
 
-    Vector3 up = vector3_cross(forward, right);
+    vector3 up = vector3_cross(forward, right);
     up = vector3_normalize(up);
 
     float a = vector3_dot(right, cameraPosition);
     float b = vector3_dot(up, cameraPosition);
     float c = vector3_dot(forward, cameraPosition);
 
-    Matrix4x4 result = { 0 };
+    matrix_4_4 result = { 0 };
     result.data[0][0] = right.x;
     result.data[0][1] = up.x;
     result.data[0][2] = forward.x;
@@ -561,3 +588,39 @@ Matrix4x4 Matrix44_CreateLookAt(Vector3 cameraPosition, Vector3 cameraTarget, Ve
 }
 
 
+bool matrix44_is_rotation(matrix_4_4 m) {
+    // 1. 检查每行是否为单位向量
+    vector3 row1 = { m.data[0][0], m.data[0][1], m.data[0][2] };
+    vector3 row2 = { m.data[1][0], m.data[1][1], m.data[1][2] };
+    vector3 row3 = { m.data[2][0], m.data[2][1], m.data[2][2] };
+
+    // 检查每行是否为单位向量
+    if (!math_approximate_equals(vector3_length_squared(row1), 1.0f) ||
+        !math_approximate_equals(vector3_length_squared(row2), 1.0f) ||
+        !math_approximate_equals(vector3_length_squared(row3), 1.0f)) {
+        return false;
+    }
+
+    // 2. 检查行向量是否互相垂直
+    if (!math_is_approximately_zero(vector3_dot(row1, row2)) ||
+        !math_is_approximately_zero(vector3_dot(row2, row3)) ||
+        !math_is_approximately_zero(vector3_dot(row3, row1))) {
+        return false;
+    }
+
+    // 3. 检查行列式是否为1（保持右手坐标系）
+    float det = matrix44_determinant(m);
+    if (!math_approximate_equals(det, 1.0f)) {
+        return false;
+    }
+
+    // 4. 检查第四行和第四列是否符合旋转矩阵的形式
+    if (!math_is_approximately_zero(m.data[3][0]) ||
+        !math_is_approximately_zero(m.data[3][1]) ||
+        !math_is_approximately_zero(m.data[3][2]) ||
+        !math_approximate_equals(m.data[3][3], 1.0f)) {
+        return false;
+    }
+
+    return true;
+}
