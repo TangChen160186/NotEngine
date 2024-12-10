@@ -189,6 +189,7 @@ vector3 vector3_catmull_rom(vector3 v1, vector3 v2, vector3 v3, vector3 v4, floa
 // Hermite 插值
 vector3 vector3_hermite(vector3 v1, vector3 tangent1, vector3 v2, vector3 tangent2, float amount) {
     ASSERT_MSG(amount >= 0.0f && amount <= 1.0f, "Hermite interpolation amount must be between 0 and 1");
+    ASSERT_MSG(vector3_is_normalized(tangent1) && vector3_is_normalized(tangent2), "Tangent must be between 0 and 1");
     vector3 result;
     float squared = amount * amount;  // t^2
     float cubed = amount * squared;   // t^3

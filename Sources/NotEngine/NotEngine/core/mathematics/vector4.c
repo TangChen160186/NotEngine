@@ -147,6 +147,7 @@ vector4 vector4_hermite(vector4 v1, vector4 tangent1, vector4 v2, vector4 tangen
 {
     ASSERT_MSG(amount >= 0.0f && amount <= 1.0f,
         "Hermite interpolation amount must be between 0 and 1");
+    ASSERT_MSG(vector4_is_normalized(tangent1) && vector4_is_normalized(tangent2), "Tangent must be between 0 and 1");
     vector4 result;
     float squared = amount * amount;  // t^2
     float cubed = amount * squared;   // t^3

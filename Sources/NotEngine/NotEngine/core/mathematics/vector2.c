@@ -219,6 +219,7 @@ vector2 vector2_catmull_rom(vector2 v1, vector2 v2, vector2 v3, vector2 v4, floa
 }
 vector2 vector2_hermite(vector2 v1, vector2 tangent1, vector2 v2, vector2 tangent2, float amount) {
     ASSERT_MSG(amount >= 0.0f && amount <= 1.0f, "Amount must be between 0 and 1");
+    ASSERT_MSG(vector2_is_normalized(tangent1) && vector2_is_normalized(tangent2), "Tangent must be between 0 and 1");
     vector2 result;
     float squared = amount * amount; // t^2
     float cubed = amount * squared; // t^3

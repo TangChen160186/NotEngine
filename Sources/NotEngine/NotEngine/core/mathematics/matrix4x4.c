@@ -239,6 +239,7 @@ matrix_4_4 matrix44_lerp(matrix_4_4 a, matrix_4_4 b, float t)
 
 matrix_4_4 matrix44_transform_quaternion(matrix_4_4 m, quaternion q)
 {
+    ASSERT_MSG(quaternion_is_normalized(q), "Quaternion must be normalized");
     // Compute rotation matrix elements
     float twoI = q.i + q.i, twoJ = q.j + q.j, twoK = q.k + q.k;
     float twoUI = q.u * twoI, twoUJ = q.u * twoJ, twoUK = q.u * twoK;
