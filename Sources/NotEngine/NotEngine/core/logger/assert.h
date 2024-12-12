@@ -1,8 +1,12 @@
 ﻿#pragma once
 #include "log.h"
+#ifdef  DEBUG
+#define ASSERT_ENABLE
+#endif
+
 
 // 断言宏
-#ifdef DEBUG
+#ifdef ASSERT_ENABLE
 #define ASSERT(condition) \
         do { \
             if (!(condition)) { \

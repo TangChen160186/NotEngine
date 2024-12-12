@@ -7,7 +7,7 @@
 #include "core/logger/assert.h"
 // Function implementations
 
-bool matrix44_equals(matrix_4_4 a, matrix_4_4 b) {
+bool matrix44_equals(Matrix4x4 a, Matrix4x4 b) {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             if (a.data[i][j] != b.data[i][j]) {
@@ -18,7 +18,7 @@ bool matrix44_equals(matrix_4_4 a, matrix_4_4 b) {
     return true;
 }
 
-bool matrix44_approximate_equals(matrix_4_4 a, matrix_4_4 b) {
+bool matrix44_approximate_equals(Matrix4x4 a, Matrix4x4 b) {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             if (math_abs(a.data[i][j] - b.data[i][j]) > MATH_EPSILON) {
@@ -29,17 +29,17 @@ bool matrix44_approximate_equals(matrix_4_4 a, matrix_4_4 b) {
     return true;
 }
 
-matrix_4_4 matrix44_identity()
+Matrix4x4 matrix44_identity()
 {
-    matrix_4_4 result = { {{1, 0, 0, 0},
+    Matrix4x4 result = { {{1, 0, 0, 0},
                     {0, 1, 0, 0},
                     {0, 0, 1, 0},
                     {0, 0, 0, 1}} };
     return result;
 }
 
-matrix_4_4 matrix44_add(matrix_4_4 a, matrix_4_4 b) {
-    matrix_4_4 result = {0};
+Matrix4x4 matrix44_add(Matrix4x4 a, Matrix4x4 b) {
+    Matrix4x4 result = {0};
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = a.data[i][j] + b.data[i][j];
@@ -48,8 +48,8 @@ matrix_4_4 matrix44_add(matrix_4_4 a, matrix_4_4 b) {
     return result;
 }
 
-matrix_4_4 matrix44_subtract(matrix_4_4 a, matrix_4_4 b) {
-    matrix_4_4 result = { 0 };
+Matrix4x4 matrix44_subtract(Matrix4x4 a, Matrix4x4 b) {
+    Matrix4x4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = a.data[i][j] - b.data[i][j];
@@ -58,8 +58,8 @@ matrix_4_4 matrix44_subtract(matrix_4_4 a, matrix_4_4 b) {
     return result;
 }
 
-matrix_4_4 matrix44_negate(matrix_4_4 m) {
-    matrix_4_4 result = { 0 };
+Matrix4x4 matrix44_negate(Matrix4x4 m) {
+    Matrix4x4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = -m.data[i][j];
@@ -68,8 +68,8 @@ matrix_4_4 matrix44_negate(matrix_4_4 m) {
     return result;
 }
 
-matrix_4_4 matrix44_product(matrix_4_4 a, matrix_4_4 b) {
-    matrix_4_4 result = { 0 };
+Matrix4x4 matrix44_product(Matrix4x4 a, Matrix4x4 b) {
+    Matrix4x4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 4; ++k) {
@@ -80,9 +80,9 @@ matrix_4_4 matrix44_product(matrix_4_4 a, matrix_4_4 b) {
     return result;
 }
 
-matrix_4_4 matrix44_multiply_scalar(matrix_4_4 a, float scalar)
+Matrix4x4 matrix44_multiply_scalar(Matrix4x4 a, float scalar)
 {
-    matrix_4_4 result = { 0 };
+    Matrix4x4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 4; ++k) {
@@ -93,8 +93,8 @@ matrix_4_4 matrix44_multiply_scalar(matrix_4_4 a, float scalar)
     return result;
 }
 
-matrix_4_4 matrix44_transpose(matrix_4_4 m) {
-    matrix_4_4 result = { 0 };
+Matrix4x4 matrix44_transpose(Matrix4x4 m) {
+    Matrix4x4 result = { 0 };
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = m.data[j][i];
@@ -105,7 +105,7 @@ matrix_4_4 matrix44_transpose(matrix_4_4 m) {
 
 
 
-float matrix44_determinant(matrix_4_4 m) {
+float matrix44_determinant(Matrix4x4 m) {
     float det;
     det = m.data[0][0] * (m.data[1][1] * (m.data[2][2] * m.data[3][3] - m.data[2][3] * m.data[3][2]) -
         m.data[1][2] * (m.data[2][1] * m.data[3][3] - m.data[2][3] * m.data[3][1]) +
@@ -122,8 +122,8 @@ float matrix44_determinant(matrix_4_4 m) {
     return det;
 }
 
-matrix_4_4 matrix44_invert(matrix_4_4 m) {
-    matrix_4_4 result;
+Matrix4x4 matrix44_invert(Matrix4x4 m) {
+    Matrix4x4 result;
     float det = matrix44_determinant(m);
     ASSERT_MSG(math_abs(det) > MATH_EPSILON, "Matrix is not invertible (determinant is zero)");
     float invDet = 1.0f / det;
@@ -152,7 +152,7 @@ matrix_4_4 matrix44_invert(matrix_4_4 m) {
     return result;
 }
 
-void matrix44_decompose(matrix_4_4 m, vector3* scale, quaternion* rotation, vector3* translation) {
+void matrix44_decompose(Matrix4x4 m, Vector3* scale, Quaternion* rotation, Vector3* translation) {
     ASSERT_NOT_NULL(scale);
     ASSERT_NOT_NULL(rotation);
     ASSERT_NOT_NULL(translation);
@@ -167,14 +167,14 @@ void matrix44_decompose(matrix_4_4 m, vector3* scale, quaternion* rotation, vect
     scale->z = math_sqrt(m.data[2][0] * m.data[2][0] + m.data[2][1] * m.data[2][1] + m.data[2][2] * m.data[2][2]);
 
     // Normalize the rotation matrix
-    matrix_4_4 rotationMatrix = m;
+    Matrix4x4 rotationMatrix = m;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             rotationMatrix.data[i][j] /= scale->arr[i];
         }
     }
 
-    // Convert rotation matrix to quaternion
+    // Convert rotation matrix to Quaternion
     // This is a simplified version and may not be fully accurate
     float trace = rotationMatrix.data[0][0] + rotationMatrix.data[1][1] + rotationMatrix.data[2][2];
     if (trace > 0) {
@@ -209,16 +209,16 @@ void matrix44_decompose(matrix_4_4 m, vector3* scale, quaternion* rotation, vect
     }
 }
 
-vector3 matrix44_transform_vector3(matrix_4_4 m, vector3 v) {
-    vector3 result;
+Vector3 matrix44_transform_vector3(Matrix4x4 m, Vector3 v) {
+    Vector3 result;
     result.x = m.data[0][0] * v.x + m.data[1][0] * v.y + m.data[2][0] * v.z + m.data[3][0];
     result.y = m.data[0][1] * v.x + m.data[1][1] * v.y + m.data[2][1] * v.z + m.data[3][1];
     result.z = m.data[0][2] * v.x + m.data[1][2] * v.y + m.data[2][2] * v.z + m.data[3][2];
     return result;
 }
 
-vector4 matrix44_transform_vector4(matrix_4_4 m, vector4 v) {
-    vector4 result;
+Vector4 matrix44_transform_vector4(Matrix4x4 m, Vector4 v) {
+    Vector4 result;
     result.x = m.data[0][0] * v.x + m.data[1][0] * v.y + m.data[2][0] * v.z + m.data[3][0] * v.w;
     result.y = m.data[0][1] * v.x + m.data[1][1] * v.y + m.data[2][1] * v.z + m.data[3][1] * v.w;
     result.z = m.data[0][2] * v.x + m.data[1][2] * v.y + m.data[2][2] * v.z + m.data[3][2] * v.w;
@@ -226,9 +226,9 @@ vector4 matrix44_transform_vector4(matrix_4_4 m, vector4 v) {
     return result;
 }
 
-matrix_4_4 matrix44_lerp(matrix_4_4 a, matrix_4_4 b, float t)
+Matrix4x4 matrix44_lerp(Matrix4x4 a, Matrix4x4 b, float t)
 {
-    matrix_4_4 result;
+    Matrix4x4 result;
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             result.data[i][j] = a.data[i][j] * (1 - t) + b.data[i][j] * t;
@@ -237,7 +237,7 @@ matrix_4_4 matrix44_lerp(matrix_4_4 a, matrix_4_4 b, float t)
     return result;
 }
 
-matrix_4_4 matrix44_transform_quaternion(matrix_4_4 m, quaternion q)
+Matrix4x4 matrix44_transform_quaternion(Matrix4x4 m, Quaternion q)
 {
     ASSERT_MSG(quaternion_is_normalized(q), "Quaternion must be normalized");
     // Compute rotation matrix elements
@@ -259,7 +259,7 @@ matrix_4_4 matrix44_transform_quaternion(matrix_4_4 m, quaternion q)
     float tR2C2 = 1.0f - twoII - twoJJ;
 
     // Compute the transformed matrix
-    matrix_4_4 result;
+    Matrix4x4 result;
 
     // First row
     result.data[0][0] = m.data[0][0] * tR0C0 + m.data[0][1] * tR1C0 + m.data[0][2] * tR2C0;
@@ -290,10 +290,10 @@ matrix_4_4 matrix44_transform_quaternion(matrix_4_4 m, quaternion q)
 
 
 
-matrix_4_4 matrix44_create_from_quaternion(quaternion q) {
+Matrix4x4 matrix44_create_from_quaternion(Quaternion q) {
     ASSERT_MSG(quaternion_is_normalized(q),
         "Quaternion must be normalized for matrix creation");
-    matrix_4_4 result;
+    Matrix4x4 result;
     float twoI = q.i + q.i, twoJ = q.j + q.j, twoK = q.k + q.k;
     float twoUI = q.u * twoI, twoUJ = q.u * twoJ, twoUK = q.u * twoK;
     float twoII = q.i * twoI, twoIJ = q.i * twoJ, twoIK = q.i * twoK;
@@ -322,55 +322,55 @@ matrix_4_4 matrix44_create_from_quaternion(quaternion q) {
     return result;
 }
 
-matrix_4_4 matrix44_create_translation(float x, float y, float z) {
-    matrix_4_4 result = { {{1, 0, 0, 0},
+Matrix4x4 matrix44_create_translation(float x, float y, float z) {
+    Matrix4x4 result = { {{1, 0, 0, 0},
                         {0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {x, y, z, 1}} };
     return result;
 }
 
-matrix_4_4 matrix44_create_scale(float x, float y, float z) {
-    matrix_4_4 result = { {{x, 0, 0, 0},
+Matrix4x4 matrix44_create_scale(float x, float y, float z) {
+    Matrix4x4 result = { {{x, 0, 0, 0},
                         {0, y, 0, 0},
                         {0, 0, z, 0},
                         {0, 0, 0, 1}} };
     return result;
 }
 
-matrix_4_4 matrix44_create_rotation_x(float radians) {
+Matrix4x4 matrix44_create_rotation_x(float radians) {
     float c = math_cos(radians);
     float s = math_sin(radians);
-    matrix_4_4 result = { {{1, 0, 0, 0},
+    Matrix4x4 result = { {{1, 0, 0, 0},
                         {0, c, s, 0},
                         {0, -s, c, 0},
                         {0, 0, 0, 1}} };
     return result;
 }
 
-matrix_4_4 matrix44_create_rotation_y(float radians) {
+Matrix4x4 matrix44_create_rotation_y(float radians) {
     float c = math_cos(radians);
     float s = math_sin(radians);
-    matrix_4_4 result = { {{c, 0, -s, 0},
+    Matrix4x4 result = { {{c, 0, -s, 0},
                         {0, 1, 0, 0},
                         {s, 0, c, 0},
                         {0, 0, 0, 1}} };
     return result;
 }
 
-matrix_4_4 matrix44_create_rotation_z(float radians) {
+Matrix4x4 matrix44_create_rotation_z(float radians) {
     float c = math_cos(radians);
     float s = math_sin(radians);
-    matrix_4_4 result = { {{c, s, 0, 0},
+    Matrix4x4 result = { {{c, s, 0, 0},
                         {-s, c, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} };
     return result;
 }
-matrix_4_4 matrix44_create_from_axis_angle(vector3 axis, float angle) {
+Matrix4x4 matrix44_create_from_axis_angle(Vector3 axis, float angle) {
     ASSERT_MSG(vector3_is_normalized(axis),
         "Rotation axis must be normalized");
-    matrix_4_4 result;
+    Matrix4x4 result;
     float x = axis.x, y = axis.y, z = axis.z;
     float sin = math_sin(angle), cos = math_cos(angle);
     float xx = x * x, yy = y * y, zz = z * z;
@@ -399,7 +399,7 @@ matrix_4_4 matrix44_create_from_axis_angle(vector3 axis, float angle) {
     return result;
 }
 
-matrix_4_4 matrix44_create_from_cartesian_axes(vector3 right, vector3 up, vector3 backward) {
+Matrix4x4 matrix44_create_from_cartesian_axes(Vector3 right, Vector3 up, Vector3 backward) {
     ASSERT_MSG(vector3_is_normalized(right) &&
         vector3_is_normalized(up) &&
         vector3_is_normalized(backward),
@@ -409,7 +409,7 @@ matrix_4_4 matrix44_create_from_cartesian_axes(vector3 right, vector3 up, vector
         math_abs(vector3_dot(backward, right)) < MATH_EPSILON,
         "Axes must be orthogonal");
     // 轴必须两两垂直且为单位长度
-    matrix_4_4 result;
+    Matrix4x4 result;
     result.data[0][0] = right.x;
     result.data[0][1] = right.y;
     result.data[0][2] = right.z;
@@ -433,15 +433,15 @@ matrix_4_4 matrix44_create_from_cartesian_axes(vector3 right, vector3 up, vector
     return result;
 }
 
-matrix_4_4 matrix44_create_world(vector3 position, vector3 forward, vector3 up) {
-    matrix_4_4 result;
-    vector3 backward = vector3_negate(forward);
+Matrix4x4 matrix44_create_world(Vector3 position, Vector3 forward, Vector3 up) {
+    Matrix4x4 result;
+    Vector3 backward = vector3_negate(forward);
     backward = vector3_normalize(backward);
 
-    vector3 right = vector3_cross(up, backward);
+    Vector3 right = vector3_cross(up, backward);
     right = vector3_normalize(right);
 
-    vector3 final_up = vector3_cross(right, backward);
+    Vector3 final_up = vector3_cross(right, backward);
     final_up = vector3_normalize(final_up);
 
     result.data[0][0] = right.x;
@@ -468,7 +468,7 @@ matrix_4_4 matrix44_create_world(vector3 position, vector3 forward, vector3 up) 
 }
 
 
-matrix_4_4 matrix44_create_perspective_field_of_view(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance) {
+Matrix4x4 matrix44_create_perspective_field_of_view(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance) {
     ASSERT_MSG(fieldOfView > 0 && fieldOfView < MATH_PI,
         "Field of view must be between 0 and PI");
     ASSERT_MSG(aspectRatio > 0, "Aspect ratio must be positive");
@@ -476,7 +476,7 @@ matrix_4_4 matrix44_create_perspective_field_of_view(float fieldOfView, float as
     ASSERT_MSG(farPlaneDistance > nearPlaneDistance,
         "Far plane must be further than near plane");
 
-    matrix_4_4 result = { 0 };
+    Matrix4x4 result = { 0 };
     float yScale = 1.0f / math_tan(fieldOfView * 0.5f);
     float xScale = yScale / aspectRatio;
     float f1 = farPlaneDistance / (nearPlaneDistance - farPlaneDistance);
@@ -491,12 +491,12 @@ matrix_4_4 matrix44_create_perspective_field_of_view(float fieldOfView, float as
     return result;
 }
 
-matrix_4_4 matrix44_create_perspective(float width, float height, float nearPlaneDistance, float farPlaneDistance) {
+Matrix4x4 matrix44_create_perspective(float width, float height, float nearPlaneDistance, float farPlaneDistance) {
     assert(nearPlaneDistance > 0);
     assert(farPlaneDistance > 0);
     assert(nearPlaneDistance < farPlaneDistance);
 
-    matrix_4_4 result = { 0 };
+    Matrix4x4 result = { 0 };
     result.data[0][0] = (nearPlaneDistance * 2.0f) / width;
     result.data[1][1] = (nearPlaneDistance * 2.0f) / height;
     result.data[2][2] = farPlaneDistance / (nearPlaneDistance - farPlaneDistance);
@@ -506,13 +506,13 @@ matrix_4_4 matrix44_create_perspective(float width, float height, float nearPlan
     return result;
 }
 
-matrix_4_4 matrix44_create_perspective_off_center(float left, float right, float bottom, float top,
+Matrix4x4 matrix44_create_perspective_off_center(float left, float right, float bottom, float top,
     float nearPlaneDistance, float farPlaneDistance) {
     assert(nearPlaneDistance > 0);
     assert(farPlaneDistance > 0);
     assert(nearPlaneDistance < farPlaneDistance);
 
-    matrix_4_4 result = { 0 };
+    Matrix4x4 result = { 0 };
     result.data[0][0] = (nearPlaneDistance * 2.0f) / (right - left);
     result.data[1][1] = (nearPlaneDistance * 2.0f) / (top - bottom);
     result.data[2][0] = (left + right) / (right - left);
@@ -524,8 +524,8 @@ matrix_4_4 matrix44_create_perspective_off_center(float left, float right, float
     return result;
 }
 
-matrix_4_4 matrix44_create_orthographic(float width, float height, float zNearPlane, float zFarPlane) {
-    matrix_4_4 result = { 0 };
+Matrix4x4 matrix44_create_orthographic(float width, float height, float zNearPlane, float zFarPlane) {
+    Matrix4x4 result = { 0 };
     result.data[0][0] = 2.0f / width;
     result.data[1][1] = 2.0f / height;
     result.data[2][2] = 1.0f / (zNearPlane - zFarPlane);
@@ -535,12 +535,12 @@ matrix_4_4 matrix44_create_orthographic(float width, float height, float zNearPl
     return result;
 }
 
-matrix_4_4 matrix44_create_orthographic_off_center(float left, float right, float bottom, float top,
+Matrix4x4 matrix44_create_orthographic_off_center(float left, float right, float bottom, float top,
     float zNearPlane, float zFarPlane) {
     ASSERT_MSG(right != left, "Left and right planes cannot be equal");
     ASSERT_MSG(top != bottom, "Top and bottom planes cannot be equal");
     ASSERT_MSG(zFarPlane != zNearPlane, "Near and far planes cannot be equal");
-    matrix_4_4 result = { 0 };
+    Matrix4x4 result = { 0 };
     result.data[0][0] = 2.0f / (right - left);
     result.data[1][1] = 2.0f / (top - bottom);
     result.data[2][2] = 1.0f / (zNearPlane - zFarPlane);
@@ -552,25 +552,25 @@ matrix_4_4 matrix44_create_orthographic_off_center(float left, float right, floa
     return result;
 }
 
-matrix_4_4 matrix44_create_look_at(vector3 cameraPosition, vector3 cameraTarget, vector3 cameraUpVector) {
+Matrix4x4 matrix44_create_look_at(Vector3 cameraPosition, Vector3 cameraTarget, Vector3 cameraUpVector) {
     ASSERT_MSG(!vector3_equals(cameraPosition, cameraTarget),
         "Camera position cannot be equal to target");
     ASSERT_MSG(vector3_length_squared(cameraUpVector) > 0,
         "Up vector cannot be zero");
-    vector3 forward = vector3_subtract(cameraPosition, cameraTarget);
+    Vector3 forward = vector3_subtract(cameraPosition, cameraTarget);
     forward = vector3_normalize(forward);
 
-    vector3 right = vector3_cross(cameraUpVector, forward);
+    Vector3 right = vector3_cross(cameraUpVector, forward);
     right = vector3_normalize(right);
 
-    vector3 up = vector3_cross(forward, right);
+    Vector3 up = vector3_cross(forward, right);
     up = vector3_normalize(up);
 
     float a = vector3_dot(right, cameraPosition);
     float b = vector3_dot(up, cameraPosition);
     float c = vector3_dot(forward, cameraPosition);
 
-    matrix_4_4 result = { 0 };
+    Matrix4x4 result = { 0 };
     result.data[0][0] = right.x;
     result.data[0][1] = up.x;
     result.data[0][2] = forward.x;
@@ -589,11 +589,11 @@ matrix_4_4 matrix44_create_look_at(vector3 cameraPosition, vector3 cameraTarget,
 }
 
 
-bool matrix44_is_rotation(matrix_4_4 m) {
+bool matrix44_is_rotation(Matrix4x4 m) {
     // 1. 检查每行是否为单位向量
-    vector3 row1 = { m.data[0][0], m.data[0][1], m.data[0][2] };
-    vector3 row2 = { m.data[1][0], m.data[1][1], m.data[1][2] };
-    vector3 row3 = { m.data[2][0], m.data[2][1], m.data[2][2] };
+    Vector3 row1 = { m.data[0][0], m.data[0][1], m.data[0][2] };
+    Vector3 row2 = { m.data[1][0], m.data[1][1], m.data[1][2] };
+    Vector3 row3 = { m.data[2][0], m.data[2][1], m.data[2][2] };
 
     // 检查每行是否为单位向量
     if (!math_approximate_equals(vector3_length_squared(row1), 1.0f) ||

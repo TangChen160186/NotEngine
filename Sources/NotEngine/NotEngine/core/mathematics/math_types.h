@@ -14,7 +14,7 @@ typedef struct
             float arr[2];
         };
     };
-} vector2;
+} Vector2;
 
 
 typedef struct
@@ -31,7 +31,7 @@ typedef struct
             float arr[3];
         };
     };
-} vector3;
+} Vector3;
 
 typedef struct
 {
@@ -47,7 +47,7 @@ typedef struct
             float arr[4];
         };
     };
-} vector4;
+} Vector4;
 
 typedef struct
 {
@@ -63,9 +63,9 @@ typedef struct
             float arr[4];
         };
     };
-} quaternion;
+} Quaternion;
 
 typedef struct
 {
     float data[4][4];
-} matrix_4_4;
+} Matrix4x4;

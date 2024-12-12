@@ -72,7 +72,6 @@ typedef enum LogLevel {
         logger_log(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__); \
         DEBUG_BREAK(); \
     } while(0)
- 
 
 // API函数
 API void logger_log(LogLevel level, const char* file, int line, const char* fmt, ...);
